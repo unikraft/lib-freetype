@@ -1,0 +1,132 @@
+#  libfreetype Makefile.uk
+#
+#  Authors: Andrei Tatar <andrei@unikraft.io>
+#
+#  Copyright (c) 2023, Unikraft GmbH and The Unikraft Authors.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+
+################################################################################
+# Library registration
+################################################################################
+$(eval $(call addlib_s,libfreetype,$(CONFIG_LIBFREETYPE)))
+
+################################################################################
+# Sources
+################################################################################
+LIBFREETYPE_VERSION=2.13.1
+LIBFREETYPE_URL=https://download.sourceforge.net/freetype/freetype-$(LIBFREETYPE_VERSION).tar.xz
+LIBFREETYPE_DIRNAME=freetype-$(LIBFREETYPE_VERSION)
+#LIBFREETYPE_PATCHDIR=$(LIBFREETYPE_BASE)/patches
+$(eval $(call fetch,libfreetype,$(LIBFREETYPE_URL)))
+#$(eval $(call patch,libfreetype,$(LIBFREETYPE_PATCHDIR),$(LIBFREETYPE_DIRNAME)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBFREETYPE_SRC = $(LIBFREETYPE_ORIGIN)/$(LIBFREETYPE_DIRNAME)
+
+################################################################################
+# Library includes
+################################################################################
+# API
+LIBFREETYPE__API = -I$(LIBFREETYPE_SRC)/include
+
+CINCLUDES-$(CONFIG_LIBFREETYPE) += $(LIBFREETYPE__API)
+CXXINCLUDES-$(CONFIG_LIBFREETYPE) += $(LIBFREETYPE__API)
+
+# Internal
+LIBFREETYPE_CINCLUDES += -I$(LIBFREETYPE_BASE)/include
+
+################################################################################
+# Global flags
+################################################################################
+# Freetype headers cause documentation warnings with clang; disable them
+ifeq ($(CONFIG_LIBFREETYPE),y)
+CFLAGS-$(call have_clang) += -Wno-documentation -Wno-documentation-unknown-command
+endif
+
+LIBFREETYPE_CFLAGS += -fvisibility=hidden
+LIBFREETYPE_CFLAGS += -DFT2_BUILD_LIBRARY
+LIBFREETYPE_CFLAGS-$(call have_clang) += -Wno-documentation
+LIBFREETYPE_CFLAGS-$(call have_clang) += -Wno-documentation-unknown-command
+
+################################################################################
+# Library sources
+################################################################################
+# These are taken from what upstream builds and sorted in alphabetical order.
+# Please maintain this ordering when updating the library.
+################################################################################
+# Base
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftsystem.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftinit.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftdebug.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftbase.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftbbox.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftglyph.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftbdf.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftbitmap.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftcid.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftfstype.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftgasp.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftgxval.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftmm.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftotval.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftpatent.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftpfr.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftstroke.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftsynth.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/fttype1.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/base/ftwinfnt.c
+# Font support
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/bdf/bdf.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/cff/cff.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/cid/type1cid.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/pcf/pcf.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/pfr/pfr.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/sfnt/sfnt.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/truetype/truetype.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/type1/type1.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/type42/type42.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/winfonts/winfnt.c
+# Output drivers
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/raster/raster.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/sdf/sdf.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/smooth/smooth.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/svg/ftsvg.c
+# Auxiliary functionality
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/autofit/autofit.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/cache/ftcache.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/gzip/ftgzip.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/lzw/ftlzw.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/bzip2/ftbzip2.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/gxvalid/gxvalid.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/otvalid/otvalid.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/psaux/psaux.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/pshinter/pshinter.c
+LIBFREETYPE_SRCS-y += $(LIBFREETYPE_SRC)/src/psnames/psnames.c
+
