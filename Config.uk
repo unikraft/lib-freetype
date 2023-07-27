@@ -1,0 +1,5 @@
+config LIBFREETYPE
+    bool "FreeType - font rendering library"
+    depends on HAVE_LIBC
+    select LIBINTEL_INTRINSICS if ARCH_X86_64
+    default n
